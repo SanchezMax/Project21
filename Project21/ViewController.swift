@@ -9,6 +9,8 @@ import UserNotifications
 import UIKit
 
 class ViewController: UIViewController, UNUserNotificationCenterDelegate {
+    
+    var timer: Timer?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -57,7 +59,8 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
         center.delegate = self
         
         let show = UNNotificationAction(identifier: "show", title: "Tell me more...", options: .foreground)
-        let category = UNNotificationCategory(identifier: "alarm", actions: [show], intentIdentifiers: [])
+        let later = UNNotificationAction(identifier: "later", title: "Remind me later", options: .foreground)
+        let category = UNNotificationCategory(identifier: "alarm", actions: [show, later], intentIdentifiers: [])
         
         center.setNotificationCategories([category])
     }
@@ -73,13 +76,25 @@ class ViewController: UIViewController, UNUserNotificationCenterDelegate {
                 // the user swiped to unlock
                 print("Default identifier")
             case "show":
+                showAlert(with: "Some more info here...")
                 print("Show more info...")
+            case "later":
+                timer = Timer(timeInterval: 86400, repeats: false) { [weak self] _ in
+                    self?.scheduleLocal()
+                }
+                print("Will be shown the next day")
             default:
                 break
             }
         }
         
         completionHandler()
+    }
+    
+    func showAlert(with message: String?) {
+        let ac = UIAlertController(title: "Notice", message: message, preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .cancel))
+        present(ac, animated: true)
     }
 }
 
